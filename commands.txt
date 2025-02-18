@@ -1,0 +1,3 @@
+conda env export --no-builds > env.yaml
+nbstripout notebooks/my_notebook.ipynb
+
