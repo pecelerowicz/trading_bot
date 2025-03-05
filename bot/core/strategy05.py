@@ -31,6 +31,7 @@ class Strategy05:
             df_large = self.utils.add_stoch_rsi(self.candle_store.get_candles(ticker, '5m'))
             df_small = self.utils.add_stoch_rsi(self.candle_store.get_candles(ticker, '1m')) # to tylko służy jako zegar
             
+            self.notify("test")
             if self.utils.is_closed(df_small): #and not self.utils.is_closed(df_large):
                 print("closed short candle, open long candle")
                 val_1 = self.utils.find_value_at_distance(df_large, 'stoch_rsi_k', distance=1, only_closed=False)
