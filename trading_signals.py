@@ -2,13 +2,13 @@ import asyncio
 import logging
 
 # Importowanie komponentów
-from data.multiple_tickers_data_source import MultipleTickersDataSource
-from data.binance_stream_manager import BinanceStreamManager
+from bot.data.stream.multiple_tickers_data_source import MultipleTickersDataSource
+from bot.data.stream.binance_stream_manager import BinanceStreamManager
 # from data.binance_data_fetcher import BinanceDataFetcher
 # from core.candle_store import CandleStore
-from core.strategy05 import Strategy05
-from core.executor import Executor
-from core.engine import Engine
+from bot.core.strategy05 import Strategy05
+from bot.core.executor import Executor
+from bot.core.engine import Engine
 
 # Konfiguracja logowania
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
