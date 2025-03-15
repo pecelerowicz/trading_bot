@@ -1,46 +1,48 @@
+import os
+import sys
+import yaml
 import asyncio
-import logging
 
-# Importowanie komponentów
+# Pobranie katalogu bazowego na podstawie lokalizacji tego skryptu
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+CONFIG_PATH = os.path.join(BASE_DIR, "config.yaml")
+
+# Sprawdzenie, czy plik istnieje
+if not os.path.exists(CONFIG_PATH):
+    raise FileNotFoundError(f"Nie znaleziono pliku konfiguracyjnego: {CONFIG_PATH}")
+
+# Wczytanie pliku YAML
+with open(CONFIG_PATH, "r") as f:
+    config = yaml.safe_load(f)
+
+bot_token = config["telegram"]["bot_token"]
+chat_id = config["telegram"]["chat_id"]
+
+sys.path.append(BASE_DIR)
+
 from bot.data.stream.multiple_tickers_data_source import MultipleTickersDataSource
-from bot.data.stream.binance_stream_manager import BinanceStreamManager
-# from data.binance_data_fetcher import BinanceDataFetcher
-# from core.candle_store import CandleStore
 from bot.core.strategy05 import Strategy05
 from bot.core.executor import Executor
 from bot.core.engine import Engine
 
-# Konfiguracja logowania
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
-logger = logging.getLogger()
-
-# Konfiguracja parametrów
-#tickers = [
-#    "ETHUSDC", "SOLUSDC", "XRPUSDC", "BTCUSDC", "ADAUSDC", "PEPEUSDC", "DOGEUSDC", "AVAXUSDC", "POLUSDC", "DOTUSDC", "LTCUSDC"]
-tickers = ["ETHUSDT", "XRPUSDT", "SOLUSDT"]
+tickers = ["BTCUSDT", "ETHUSDT"]
 source_interval = "1m"
-intervals = ['1m', '5m', '15m', '1h', '4h']
+intervals = ['1m', '5m', '15m', '1h', '4h', '1d']
 number_candles = 50
 
-# Tworzenie komponentów
-# binance_data_fetcher = BinanceDataFetcher()
 data_source = MultipleTickersDataSource(tickers=tickers, interval=source_interval, only_closed=False)
-
-# Strategia z domyślnymi kolumnami: 'time_utc', 'open', 'close', 'is_closed'
 strategy = Strategy05(tickers, intervals, number_candles, display_columns=['time_utc', 'open', 'close', 'volume', 'is_closed'])
-executor = Executor(
-    bot_token="7807553871:AAHAKc62nu51cnuCouOEwTnX4WlJ7BjTZc4",  # Twój token
-    chat_id=5939592276  # Twoje chat_id
-)
-engine = Engine(data_source, strategy, executor)
+executor = Executor(bot_token=bot_token, chat_id=chat_id)
 
-# Główna funkcja asynchroniczna
+engine = Engine(data_source, executor)
+engine.add_strategy(strategy)
+
+asyncio.set_event_loop_policy(asyncio.DefaultEventLoopPolicy())
+
 async def main():
-    logger.info("Setting up the engine...")
     engine.setup()
-    logger.info("Starting the engine...")
     await engine.start()
 
-# Uruchomienie skryptu
 if __name__ == "__main__":
     asyncio.run(main())
+
